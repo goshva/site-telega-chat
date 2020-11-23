@@ -32,11 +32,13 @@ export default {
   name: 'Chat',
   data() {
     return {
+      name: '',
+      identity: 0,
       participants: [
         {
           id: 'user1',
-          name: 'Matteo',
-          imageUrl: 'https://avatars3.githubusercontent.com/u/1915989?s=230&v=4'
+          name: 'Егор',
+          imageUrl: 'https://quest0.ru/images/index-3-3-390x332.jpg'
         },
         {
           id: 'user2',
@@ -95,6 +97,7 @@ export default {
     onMessageWasSent (message) {
       // called when the user sends a message
       let json = ['feedback_messages', {
+          identity: this.identity,
           text: message.data.text,
           person: 'web-Клиент'
       }]
@@ -121,9 +124,33 @@ export default {
       const m = this.messageList.find(m=>m.id === message.id);
       m.isEdited = true;
       m.data.text = message.data.text;
+    },
+    soundPlay(){
+      var audio = new Audio('in.mp3');
+      audio.play();
+    },
+    idgen(length){
+      var result           = '';
+      var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      var charactersLength = characters.length;
+      for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      return result;
     }
   },
-  mounted: function () {
+  mounted() {
+    if (localStorage.name) {
+      this.name = localStorage.name;
+    }
+    if (localStorage.identity) {
+      this.identity = localStorage.identity;
+    }
+    else {
+      localStorage.identity =  this.idgen(Math.random()*48+16);
+      this.identity = localStorage.identity;
+
+    }
     this.$options.sockets.onmessage = (event) =>  { 
            console.log(event)
       const data = JSON.parse(event.data)
@@ -132,8 +159,8 @@ export default {
 //    console.log(servdata)
       console.log(line)
       if (data[1].direction == "reply"){
-        this.messageList = [ ...this.messageList,  { type: 'text', author: `user1`, data: { text :line }} ] }
-
+        this.soundPlay(); 
+        this.messageList = [ ...this.messageList,  { type: 'text', author: `supp`, data: { text :line}} ] }
       }
     // { type: 'text', author: `user1`, data: { text: `Добро пожаловать. Чем мы можем помочь?` } }
     //    this.$options.sockets.onmessage = (data) => this.messageList.push(data)
